@@ -5,24 +5,39 @@ html, body {
 canvas {
   display: block;
 }
-.autonomous-btn {
-  background-color: #3F51B5;
-  color: white;
+
+.autonomous-btn, .randomize-btn, .record-btn, .sync-btn {
   padding: 10px 20px;
   border: none;
   border-radius: 3px;
   cursor: pointer;
   font-size: 14px;
 }
+
+.autonomous-btn {
+  background-color: #3F51B5;
+  color: white;
+}
+
+.sync-btn {
+  background-color: #3F51B5;
+  color: white;
+}
 .randomize-btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
+
 .record-btn {
   background-color: #673AB7;
   color: white;
-  padding: 10px 10px;
-  border: none;
   border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+}
+
+/* Mobile view adjustments */
+@media (max-width: 768px) {
+  .autonomous-btn, .randomize-btn, .record-btn, .sync-btn {
+    padding: 8px 16px;  /* Smaller padding */
+    font-size: 12px;  /* Smaller text */
+  }
+}
