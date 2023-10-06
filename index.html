@@ -5,51 +5,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/addons/p5.sound.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
     <meta charset="utf-8" />
-
   </head>
   <body>
     <main>
+      <!-- put the buttons here -->
+      <button id="tempo-up">+</button>
+      <button id="tempo-down">-</button>
     </main>
     <script src="sketch.js"></script>
+    <script>
+      // Moved your inline JS here
+      document.getElementById("tempo-up").addEventListener("click", function() {
+        changeTempo(tempo + 10);
+      });
+
+      document.getElementById("tempo-down").addEventListener("click", function() {
+        changeTempo(tempo - 10);
+      });
+    </script>
   </body>
 </html>
-<button id="tempo-up">+</button>
-<button id="tempo-down">-</button>
-
-<script>
-  // Add a click event listener to the "tempo-up" button
-  document.getElementById("tempo-up").addEventListener("click", function() {
-    changeTempo(tempo + 10);
-  });
-
-  // Add a click event listener to the "tempo-down" button
-  document.getElementById("tempo-down").addEventListener("click", function() {
-    changeTempo(tempo - 10);
-  });
-</script>
-<style>
-  .randomize-btn {
-    background-color: #ff0000;
-    color: #ffffff;
-    font-size: 14px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  .randomize-btn:hover {
-    background-color: #00ff00;
-  }
-  .autonomous-btn {
-    background-color: #ff0000;
-    color: #ffffff;
-    font-size: 14px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  .autonomous-btn:hover {
-    background-color: #00ff00;
-  }
-</style>
