@@ -10,7 +10,7 @@ canvas {
   color: white;
   padding: 10px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 3px;
   cursor: pointer;
   font-size: 14px;
 }
@@ -18,3 +18,11 @@ canvas {
   background-color: #ccc;
   cursor: not-allowed;
 }
+.record-btn {
+  background-color: #673AB7;
+  color: white;
+  padding: 10px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
