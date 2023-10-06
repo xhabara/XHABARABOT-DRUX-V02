@@ -10,6 +10,7 @@ let recorder, soundFile;
 let isRecording = false;
 let recordButton;
 let gain;
+const scale_factor = 0.5;
 
 
 
@@ -19,56 +20,65 @@ function preload() {
   drumNames.forEach((name, idx) => drumSounds[idx] = loadSound(name));
 }
 
-// Setup function
 function setup() {
-  createCanvas(windowWidth * 0.8, windowHeight * 0.55);
-  pads.push(...Array.from({ length: 4 }, (_, i) => new Pad(i)));
+  // Apply the scaling factor to the canvas dimensions
+  createCanvas(windowWidth * 0.8 * scale_factor, windowHeight * 0.8 * scale_factor);
+
+  // Create pads and initialize the currentStep array
+  pads.push(...Array.from({ length: 4 }, (_, i) => new Pad(i, scale_factor)));
   currentStep.push(...Array.from({ length: 4 }, () => 0));
 
-   let buttonY = height * 0.5;  // Centralized Y position
-  let buttonSpacing = 136;  // Space between buttons
+let buttonY = height * 0.7;  
+  let buttonSpacing = 60;  
   
-  syncButton = new SyncButton();
-  syncButton.x = width / 2.5;  // Center the syncButton
+  syncButton = new SyncButton(scale_factor);
+  syncButton.x = width / 2.35;
   syncButton.y = buttonY;
-
+ 
+  
+  
+  
   randomizeButton = createButton('Randomize Manually')
-    .position(width / 3.5 - buttonSpacing, buttonY)
+    .position(width / 3 - buttonSpacing, buttonY)
     .mousePressed(randomizeSequence)
-    .addClass('randomize-btn');
+    .addClass('randomize-btn')
+    .style('font-size', '7px')
+    .style('padding', '5px 10px');  // Smaller padding
   
   autonomousButton = createButton('Xhabarabot Mode')
-    .position(width / 2.7 + buttonSpacing, buttonY)
+    .position(width / 2.5 + buttonSpacing, buttonY)
     .mousePressed(toggleAutonomousMode)
-    .addClass('autonomous-btn');
+    .addClass('autonomous-btn')
+    .style('font-size', '8px')
+    .style('padding', '5px 10px');
   
   // Initialize recorder and soundFile
-recorder = new p5.SoundRecorder();
-soundFile = new p5.SoundFile();
+  recorder = new p5.SoundRecorder();
+  soundFile = new p5.SoundFile();
 
-// Create and style the record button
-recordButton = createButton('Record');
-recordButton.position(240, 350);  // Change this position to your liking
-recordButton.mousePressed(toggleRecording);
-recordButton.addClass('record-btn');
+  // Create and style the record button
+recordButton = createButton('Start Recording');
+  recordButton.position(230 * scale_factor, 370 * scale_factor)
+              .mousePressed(toggleRecording)
+              .addClass('record-btn')
+              .style('font-size', `${25 * scale_factor}px`)
+              .style('padding', `${7 * scale_factor}px ${15 * scale_factor}px`);
   
   gain = new p5.Gain();
-gain.connect();
-recorder.setInput(gain);
-
-
+  gain.connect();
+  recorder.setInput(gain);
 }
 
-// Draw function
 function draw() {
   background(45, 45, 50);
   pads.forEach(pad => pad.display());
   syncButton.display();
 
+  // Scaled down text size for mobile view
   textAlign(CENTER, CENTER);
   fill(255);
-  textSize(6);
-  text(`${tempo} BPM`, width * 0.07, height * 0.97);
+  textSize(8);
+  text(`${tempo} BPM`, width * 0.08, height * 0.02);
 }
 
 function playStep(step, padIndex) {
@@ -86,14 +96,13 @@ function randomizeSequence() {
   });
 }
 
-// Pad class
 class Pad {
-  constructor(soundIndex) {
+  constructor(soundIndex, scale_factor) {
     this.soundIndex = soundIndex;
-    this.x = (width / 6) * (soundIndex + 1);
-    this.y = height * 0.1;
-    this.width = width / 7;
-    this.height = height / 3;
+    this.x = (width / 2.8) * (soundIndex + 1) * scale_factor;
+    this.y = height * 0.3 * scale_factor;
+    this.width = (width / 5) * scale_factor;
+    this.height = (height / 3) * scale_factor;
     this.sequence = [this.soundIndex];
     this.isPlaying = false;
     this.isSynced = false;
@@ -130,23 +139,22 @@ class Pad {
   }
 }
 
-// SyncButton class
 class SyncButton {
-  constructor() {
-    this.x = width / 2 - 50;
-    this.y = height * 0.8;
-    this.width = 100;
-    this.height = 30;
+  constructor(scale_factor) {
+    this.x = (width / 2 - 60) * scale_factor;
+    this.y = (height * 0.8) * scale_factor;
+    this.width = 100 * scale_factor;
+    this.height = 50 * scale_factor;
     this.isSynced = false;
   }
 
   display() {
     noStroke();
     fill(this.isSynced ? '#00ff00' : '#ff0000');
-    rect(this.x, this.y, this.width, this.height, 7);
-    textAlign(CENTER, CENTER);
+    rect(this.x, this.y, this.width, this.height, 9);
+   
     fill(25);
-    textSize(10);
+    textSize(8);
     text(this.isSynced ? 'CHANGE' : 'RETURN', this.x + this.width / 2, this.y + this.height / 2);
   }
 
@@ -192,12 +200,9 @@ function keyPressed() {
     changeTempo(tempo - 10);
   }
 }
-
-// Change tempo function
 function changeTempo(newTempo) {
   tempo = constrain(newTempo, 30, 300);
 }
-
 function toggleAutonomousMode() {
   autonomousMode = !autonomousMode;
   autonomousButton.html(autonomousMode ? 'Stop Xhabarabot Mode' : 'Xhabarabot Mode');
@@ -247,3 +252,4 @@ function toggleRecording() {
     isRecording = false;
   }
 }
+
