@@ -6,6 +6,11 @@ let syncButton;
 let randomizeButton;
 let autonomousButton;
 let autonomousMode = false;
+let recorder, soundFile;
+let isRecording = false;
+let recordButton;
+let gain;
+
 
 // Preload drum sounds
 function preload() {
@@ -13,22 +18,43 @@ function preload() {
   drumNames.forEach((name, idx) => drumSounds[idx] = loadSound(name));
 }
 
-// Setup function
 function setup() {
-  createCanvas(windowWidth * 0.5, windowHeight * 0.35);
+  createCanvas(windowWidth * 0.8, windowHeight * 0.55);
   pads.push(...Array.from({ length: 4 }, (_, i) => new Pad(i)));
   currentStep.push(...Array.from({ length: 4 }, () => 0));
 
+   let buttonY = height * 0.5;  // Centralized Y position
+  let buttonSpacing = 136;  // Space between buttons
+  
   syncButton = new SyncButton();
+  syncButton.x = width / 2.5;  // Center the syncButton
+  syncButton.y = buttonY;
+
   randomizeButton = createButton('Randomize Manually')
-    .position(width / 2.3 - 45, height * 0.68)
+    .position(width / 3.5 - buttonSpacing, buttonY)
     .mousePressed(randomizeSequence)
     .addClass('randomize-btn');
   
   autonomousButton = createButton('Xhabarabot Mode')
-    .position(width / 4.5 + 60, height * 0.55)
+    .position(width / 2.7 + buttonSpacing, buttonY)
     .mousePressed(toggleAutonomousMode)
     .addClass('autonomous-btn');
+  
+  // Initialize recorder and soundFile
+recorder = new p5.SoundRecorder();
+soundFile = new p5.SoundFile();
+
+// Create and style the record button
+recordButton = createButton('Record');
+recordButton.position(240, 350);  
+recordButton.mousePressed(toggleRecording);
+recordButton.addClass('record-btn');
+  
+  gain = new p5.Gain();
+gain.connect();
+recorder.setInput(gain);
+
+
 }
 
 // Draw function
@@ -39,14 +65,16 @@ function draw() {
 
   textAlign(CENTER, CENTER);
   fill(255);
-  textSize(3);
+  textSize(6);
   text(`${tempo} BPM`, width * 0.07, height * 0.97);
 }
 
-// Play step function
 function playStep(step, padIndex) {
+  drumSounds[step]?.disconnect();  // Disconnect from master output
+  drumSounds[step]?.connect(gain); // Connect to gain node instead
   drumSounds[step]?.play();
-}
+  gain.amp(0.5);  
+
 
 // Randomize sequence function
 function randomizeSequence() {
@@ -186,20 +214,34 @@ function autonomousBehavior() {
   let randomPad = random(pads);
   randomPad.isPlaying ? randomPad.stopLoop() : randomPad.startLoop();
 
-  // Randomly change tempo
+  
   if (random() < 0.2) {
     changeTempo(tempo + random(-10, 10));
   }
 
-  // Randomly synchronize
+  
   if (random() < 0.1) {
     syncButton.toggleSync();
   }
 
-  // Randomly randomize sequences
+  
   if (random() < 0.05) {
     randomizeSequence();
   }
 
   setTimeout(autonomousBehavior, random(200, 1000)); // Adjust timing as desired
 }
+
+function toggleRecording() {
+  if (!isRecording) {
+    recorder.record(soundFile);
+    recordButton.html('Stop Recording');
+    isRecording = true;
+  } else {
+    recorder.stop();
+    recordButton.html('Download');
+    soundFile.save('XhabarabotDrux.wav');
+    isRecording = false;
+  }
+}
+
