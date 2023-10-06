@@ -12,12 +12,14 @@ let recordButton;
 let gain;
 
 
+
 // Preload drum sounds
 function preload() {
   const drumNames = ["RullyShabaraSampleR1.wav", "RullyShabaraSampleR2.wav", "RullyShabaraSampleR3.wav", "RullyShabaraSampleR4.wav"];
   drumNames.forEach((name, idx) => drumSounds[idx] = loadSound(name));
 }
 
+// Setup function
 function setup() {
   createCanvas(windowWidth * 0.8, windowHeight * 0.55);
   pads.push(...Array.from({ length: 4 }, (_, i) => new Pad(i)));
@@ -46,7 +48,7 @@ soundFile = new p5.SoundFile();
 
 // Create and style the record button
 recordButton = createButton('Record');
-recordButton.position(240, 350);  
+recordButton.position(240, 350);  // Change this position to your liking
 recordButton.mousePressed(toggleRecording);
 recordButton.addClass('record-btn');
   
@@ -73,7 +75,8 @@ function playStep(step, padIndex) {
   drumSounds[step]?.disconnect();  // Disconnect from master output
   drumSounds[step]?.connect(gain); // Connect to gain node instead
   drumSounds[step]?.play();
-  gain.amp(0.5);  
+  gain.amp(0.5);  // Set gain amount, adjust this to your liking
+}
 
 
 // Randomize sequence function
@@ -214,17 +217,17 @@ function autonomousBehavior() {
   let randomPad = random(pads);
   randomPad.isPlaying ? randomPad.stopLoop() : randomPad.startLoop();
 
-  
+  // Randomly change tempo
   if (random() < 0.2) {
     changeTempo(tempo + random(-10, 10));
   }
 
-  
+  // Randomly synchronize
   if (random() < 0.1) {
     syncButton.toggleSync();
   }
 
-  
+  // Randomly randomize sequences
   if (random() < 0.05) {
     randomizeSequence();
   }
@@ -244,4 +247,3 @@ function toggleRecording() {
     isRecording = false;
   }
 }
-
