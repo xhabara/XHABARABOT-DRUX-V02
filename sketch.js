@@ -21,8 +21,8 @@ function preload() {
 }
 
 function setup() {
-  // Apply the scaling factor to the canvas dimensions
-  createCanvas(windowWidth * 0.8 * scale_factor, windowHeight * 0.8 * scale_factor);
+ createCanvas(310, 300); // Or whatever fixed size you want
+
 
   // Create pads and initialize the currentStep array
   pads.push(...Array.from({ length: 4 }, (_, i) => new Pad(i, scale_factor)));
@@ -32,37 +32,39 @@ let buttonY = height * 0.7;
   let buttonSpacing = 60;  
   
   syncButton = new SyncButton(scale_factor);
-  syncButton.x = width / 2.35;
-  syncButton.y = buttonY;
+  syncButton.x = 135;  
+syncButton.y = 175;  
+syncButton.width = 60; 
+syncButton.height = 30;
  
   
   
   
   randomizeButton = createButton('Randomize Manually')
-    .position(width / 3 - buttonSpacing, buttonY)
+    
     .mousePressed(randomizeSequence)
-    .addClass('randomize-btn')
-    .style('font-size', '7px')
-    .style('padding', '5px 10px');  // Smaller padding
+    randomizeButton.position(30, 200);  
+randomizeButton.style('font-size', '8px');
+randomizeButton.style('padding', '5px 10px');
+window.randomizeButtonColor = [255, 255, 255];  // Default to white
+ 
   
   autonomousButton = createButton('Xhabarabot Mode')
-    .position(width / 2.5 + buttonSpacing, buttonY)
     .mousePressed(toggleAutonomousMode)
-    .addClass('autonomous-btn')
-    .style('font-size', '8px')
-    .style('padding', '5px 10px');
+    autonomousButton.position(200, 200); 
+autonomousButton.style('font-size', '8px');
+autonomousButton.style('padding', '5px 10px'); 
   
   // Initialize recorder and soundFile
   recorder = new p5.SoundRecorder();
   soundFile = new p5.SoundFile();
 
-  // Create and style the record button
 recordButton = createButton('Start Recording');
-  recordButton.position(230 * scale_factor, 370 * scale_factor)
-              .mousePressed(toggleRecording)
-              .addClass('record-btn')
-              .style('font-size', `${25 * scale_factor}px`)
-              .style('padding', `${7 * scale_factor}px ${15 * scale_factor}px`);
+recordButton.mousePressed(toggleRecording);
+
+recordButton.position(30, 265); 
+recordButton.style('font-size', '8px');
+recordButton.style('padding', '5px 10px'); 
   
   gain = new p5.Gain();
   gain.connect();
@@ -79,13 +81,21 @@ function draw() {
   fill(255);
   textSize(8);
   text(`${tempo} BPM`, width * 0.08, height * 0.02);
+  
+  randomizeButton.style('background-color', `rgb(${randomizeButtonColor[0]}, ${randomizeButtonColor[1]}, ${randomizeButtonColor[2]})`);
+  
+// Slowly fade the color back to white
+randomizeButtonColor[0] = lerp(randomizeButtonColor[0], 255, 0.1);
+randomizeButtonColor[1] = lerp(randomizeButtonColor[1], 255, 0.1);
+randomizeButtonColor[2] = lerp(randomizeButtonColor[2], 255, 0.1);
+
 }
 
 function playStep(step, padIndex) {
   drumSounds[step]?.disconnect();  // Disconnect from master output
   drumSounds[step]?.connect(gain); // Connect to gain node instead
   drumSounds[step]?.play();
-  gain.amp(0.5);  // Set gain amount, adjust this to your liking
+  gain.amp(0.5);  
 }
 
 
@@ -94,15 +104,16 @@ function randomizeSequence() {
   pads.forEach(pad => {
     pad.sequence = Array.from({ length: floor(random(1, 9)) }, () => floor(random(0, 8)));
   });
+  randomizeButtonColor = [random(255), random(255), random(255)];
 }
 
 class Pad {
-  constructor(soundIndex, scale_factor) {
+  constructor(soundIndex) {
     this.soundIndex = soundIndex;
-    this.x = (width / 2.8) * (soundIndex + 1) * scale_factor;
-    this.y = height * 0.3 * scale_factor;
-    this.width = (width / 5) * scale_factor;
-    this.height = (height / 3) * scale_factor;
+    this.x = 20 + (70 * soundIndex);  // Start at 20, then add 70 for each new pad
+    this.y = 50;  
+    this.width = 60;  
+    this.height = 60;
     this.sequence = [this.soundIndex];
     this.isPlaying = false;
     this.isSynced = false;
@@ -237,7 +248,7 @@ function autonomousBehavior() {
     randomizeSequence();
   }
 
-  setTimeout(autonomousBehavior, random(200, 1000)); // Adjust timing as desired
+  setTimeout(autonomousBehavior, random(200, 1000)); 
 }
 
 function toggleRecording() {
@@ -252,4 +263,3 @@ function toggleRecording() {
     isRecording = false;
   }
 }
-
