@@ -1,94 +1,134 @@
-const drumSounds = [];
-const pads = [];
-let tempo = 120;
-const currentStep = [];
-let syncButton;
-let randomizeButton;
-let autonomousButton;
-let autonomousMode = false;
-let recorder, soundFile;
-let isRecording = false;
-let recordButton;
-let gain;
-const scale_factor = 0.5;
+// Styling constants 
+const hackerGreen = '#0f0';
+const matrixBlack = '#000';
+const consoleFont = 'monospace';
+const glowEffect = '0 0 10px #0f0';
 
-
+// Initialize the necessary arrays and objects
+let drumSounds = []; // Array for storing drum sounds
+let pads = []; // Array for storing pad objects
+let tempo = 120; // Initial tempo
+let currentStep = []; // Array to keep track of current steps in sequences
+let syncButton, randomizeButton, autonomousButton; // Button objects
+let autonomousMode = false; // Flag for autonomous mode
+let recorder, soundFile; // Objects for recording functionality
+let isRecording = false; // Flag for recording state
+let recordButton; // Button object for recording
+let gain; // Gain node for audio manipulation
+let refreshButton;
 
 // Preload drum sounds
 function preload() {
   const drumNames = ["RullyShabaraSampleR1.wav", "RullyShabaraSampleR2.wav", "RullyShabaraSampleR3.wav", "RullyShabaraSampleR4.wav"];
-  drumNames.forEach((name, idx) => drumSounds[idx] = loadSound(name));
+  drumSounds = drumNames.map(name => loadSound(name)); // Load and assign drum sounds
 }
 
 function setup() {
- createCanvas(310, 300); // Or whatever fixed size you want
-
+  createCanvas(310, 330).style('background-color', matrixBlack); // Matrix-style background
 
   // Create pads and initialize the currentStep array
-  pads.push(...Array.from({ length: 4 }, (_, i) => new Pad(i, scale_factor)));
-  currentStep.push(...Array.from({ length: 4 }, () => 0));
+  for (let i = 0; i < 4; i++) {
+    pads.push(new Pad(i));
+    currentStep[i] = 0;
+  }
 
-let buttonY = height * 0.7;  
-  let buttonSpacing = 60;  
-  
-  syncButton = new SyncButton(scale_factor);
-  syncButton.x = 135;  
-syncButton.y = 175;  
-syncButton.width = 60; 
-syncButton.height = 30;
- 
-  
-  
-  
-  randomizeButton = createButton('Randomize Manually')
-    
-    .mousePressed(randomizeSequence)
-    randomizeButton.position(30, 200);  
-randomizeButton.style('font-size', '8px');
-randomizeButton.style('padding', '5px 10px');
-window.randomizeButtonColor = [255, 255, 255];  // Default to white
- 
-  
-  autonomousButton = createButton('Xhabarabot Mode')
-    .mousePressed(toggleAutonomousMode)
-    autonomousButton.position(200, 200); 
-autonomousButton.style('font-size', '8px');
-autonomousButton.style('padding', '5px 10px'); 
-  
-  // Initialize recorder and soundFile
-  recorder = new p5.SoundRecorder();
-  soundFile = new p5.SoundFile();
+  // Create and style buttons
+syncButton = createButton('CHANGE').mousePressed(toggleSync);
+  styleButton(syncButton, 230, 170);
+  syncButton.mouseOver(() => hoverButton(syncButton));
+  syncButton.mouseOut(() => styleButton(syncButton, 230, 170));
 
-recordButton = createButton('Start Recording');
-recordButton.mousePressed(toggleRecording);
 
-recordButton.position(30, 265); 
-recordButton.style('font-size', '8px');
-recordButton.style('padding', '5px 10px'); 
+  autonomousButton = createButton('XHABARABOT MODE').mousePressed(() => toggleButton(autonomousButton, toggleAutonomousMode));
+  styleButton(autonomousButton, 30, 210);
+
+  recordButton = createButton('RECORD').mousePressed(() => toggleButton(recordButton, toggleRecording));
+  styleButton(recordButton, 30, 265);
   
+ randomizeButton = createButton('RANDOMIZE').mousePressed(randomizeSequence);
+  styleButton(randomizeButton, 30, 170);
+  randomizeButton.mouseOver(() => hoverButton(randomizeButton));
+  randomizeButton.mouseOut(() => styleButton(randomizeButton, 30, 170));
+  randomizeButton.addClass('highlighted'); 
+
+  // Event listeners for HTML buttons
+  document.getElementById("tempo-up").addEventListener("click", () => changeTempo(tempo + 10));
+  document.getElementById("tempo-down").addEventListener("click", () => changeTempo(tempo - 10));
+
+  // Set up the audio recording infrastructure
   gain = new p5.Gain();
   gain.connect();
+  recorder = new p5.SoundRecorder();
   recorder.setInput(gain);
+  soundFile = new p5.SoundFile();
+  
+refreshButton = createButton('REFRESH')
+    .position(225, 265) 
+    .style('font-family', consoleFont)
+    .style('background-color', matrixBlack)
+    .style('color', hackerGreen)
+    .style('border', `1px solid ${hackerGreen}`)
+    .style('text-shadow', glowEffect)
+    .style('padding', '5px 10px')
+    .style('cursor', 'pointer')
+    .mousePressed(refreshCanvas);
+}
+
+function highlightButton(button) {
+  button.style('background-color', '#0f0'); // Green background
+  button.style('color', '#000'); // Black text
 }
 
 function draw() {
-  background(45, 45, 50);
+  background(matrixBlack); 
   pads.forEach(pad => pad.display());
-  syncButton.display();
-
+  
   // Scaled down text size for mobile view
   textAlign(CENTER, CENTER);
-  fill(255);
+  fill(hackerGreen);
   textSize(8);
   text(`${tempo} BPM`, width * 0.08, height * 0.02);
+}
+ 
+function initializeButtons() {
   
-  randomizeButton.style('background-color', `rgb(${randomizeButtonColor[0]}, ${randomizeButtonColor[1]}, ${randomizeButtonColor[2]})`);
-  
-// Slowly fade the color back to white
-randomizeButtonColor[0] = lerp(randomizeButtonColor[0], 255, 0.1);
-randomizeButtonColor[1] = lerp(randomizeButtonColor[1], 255, 0.1);
-randomizeButtonColor[2] = lerp(randomizeButtonColor[2], 255, 0.1);
+  syncButton = new SyncButton(0.5);  
 
+  randomizeButton = createButton('RANDOMIZE').mousePressed(function() {
+    randomizeSequence();
+    provideClickFeedback(this);
+  });
+  styleHackerButton(randomizeButton, 30, 200);
+
+  autonomousButton = createButton('XHABARABOT MODE').mousePressed(function() {
+    toggleAutonomousMode();
+    provideClickFeedback(this);
+  });
+  styleHackerButton(autonomousButton, 200, 200);
+
+  recordButton = createButton('RECORD').mousePressed(function() {
+    toggleRecording();
+    provideClickFeedback(this);
+  });
+  styleHackerButton(recordButton, 30, 265);
+
+  syncButton = createButton('CHANGE').mousePressed(() => {
+    
+  });
+  styleHackerButton(syncButton, 135, 175, 60, 30);
+
+
+
+}
+
+function toggleButton(button, action) {
+  button.elt.classList.toggle('active'); // Toggle 'active' class on the button
+  action(); // Call the button's respective function
+}
+
+function toggleSync() {
+  
+  pads.forEach(pad => pad.setSync(!pad.isSynced));
 }
 
 function playStep(step, padIndex) {
@@ -107,11 +147,28 @@ function randomizeSequence() {
   randomizeButtonColor = [random(255), random(255), random(255)];
 }
 
-class Pad {
+function styleButton(button, x, y) {
+  button.position(x, y);
+  button.style('font-family', consoleFont);
+  button.style('background-color', matrixBlack);
+  button.style('color', hackerGreen);
+  button.style('border', `1px solid ${hackerGreen}`);
+  button.style('text-shadow', glowEffect);
+  button.style('font-size', '10px');
+  button.style('padding', '5px 10px');
+}
+
+// New function for hover effect
+function hoverButton(button) {
+  button.style('background-color', '#555'); 
+  button.style('color', '#fff'); // White text
+}
+
+class Pad{
   constructor(soundIndex) {
     this.soundIndex = soundIndex;
     this.x = 20 + (70 * soundIndex);  // Start at 20, then add 70 for each new pad
-    this.y = 50;  
+    this.y = 70;  
     this.width = 60;  
     this.height = 60;
     this.sequence = [this.soundIndex];
@@ -119,10 +176,11 @@ class Pad {
     this.isSynced = false;
   }
 
-  display() {
-    fill(this.isPlaying ? 'rgb(255, 200, 0)' : 80);
+ display() {
+    fill(this.isPlaying ? 'rgb(0, 255, 0)' : 'rgb(50, 50, 50)');
     rect(this.x, this.y, this.width, this.height, 5);
   }
+
 
   isClicked(x, y) {
     return x > this.x && x < this.x + this.width && y > this.y && y < this.y + this.height;
@@ -160,14 +218,13 @@ class SyncButton {
   }
 
   display() {
-    noStroke();
-    fill(this.isSynced ? '#00ff00' : '#ff0000');
-    rect(this.x, this.y, this.width, this.height, 9);
-   
-    fill(25);
-    textSize(8);
-    text(this.isSynced ? 'CHANGE' : 'RETURN', this.x + this.width / 2, this.y + this.height / 2);
-  }
+    fill(this.isSynced ? hackerGreen : '#ff0000');
+    rect(this.x, this.y, this.width, this.height, 10);
+    fill(matrixBlack);
+    textSize(10);
+    text(this.isSynced ? 'SYNCED' : 'UNSYNC', this.x + this.width / 2, this.y + this.height / 2);
+  
+}
 
   isClicked(x, y) {
     return x > this.x && x < this.x + this.width && y > this.y && y < this.y + this.height;
@@ -179,6 +236,8 @@ class SyncButton {
   }
 }
 
+
+
 // Mouse click handling
 function mouseClicked() {
   pads.forEach(pad => {
@@ -187,12 +246,13 @@ function mouseClicked() {
     }
   });
 
-  if (syncButton.isClicked(mouseX, mouseY)) {
+ 
+  if (syncButton instanceof SyncButton && syncButton.isClicked(mouseX, mouseY)) {
     syncButton.toggleSync();
   }
 }
 
-// Key press handling
+
 function keyPressed() {
   const playSteps = {
     "1": () => playStep(0, 0),
@@ -238,10 +298,7 @@ function autonomousBehavior() {
     changeTempo(tempo + random(-10, 10));
   }
 
-  // Randomly synchronize
-  if (random() < 0.1) {
-    syncButton.toggleSync();
-  }
+ 
 
   // Randomly randomize sequences
   if (random() < 0.05) {
@@ -262,4 +319,9 @@ function toggleRecording() {
     soundFile.save('XhabarabotDrux.wav');
     isRecording = false;
   }
+}
+
+function refreshCanvas() {
+  // Refresh the page
+  window.location.reload();
 }
