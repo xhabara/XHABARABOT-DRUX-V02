@@ -24,7 +24,7 @@ canvas {
   color: white;
 }
 .randomize-btn:disabled {
-  background-color: #ccc;
+  background-color: #045A07;
   cursor: not-allowed;
 }
 
@@ -33,4 +33,50 @@ canvas {
   color: white;
   border-radius: 4px;
 }
+button {
+  padding: 10px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  font-family: 'monospace';
+  background-color: #000;
+  color: #0f0;
+  border: 1px solid #0f0;
+  text-shadow: 0 0 10px #0f0;
+}
 
+
+button.active {
+  background-color: #555; 
+  color: #fff; 
+}
+button.highlighted {
+  background-color: #0f0; 
+  color: #000; 
+}
+
+
+button:hover {
+  background-color: #555; 
+  color: #fff; 
+}
+
+main {
+  position: relative; 
+}
+
+#tempo-up, #tempo-down {
+  position: absolute;
+  top: 10px; 
+}
+
+#tempo-up {
+  left: 15%; 
+  transform: translateX(-100%); 
+}
+
+#tempo-down {
+  left: 15%; 
+  transform: translateX(0%); 
+}
